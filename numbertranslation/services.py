@@ -6,6 +6,7 @@ class NumberTranslationService:
     MAX_LIMIT_ERROR = 'Número acima do limite válido'
 
     UNITS = {
+        '0': 'zero',
         '1': 'um',
         '2': 'dois',
         '3': 'três',
@@ -49,30 +50,33 @@ class NumberTranslationService:
         :return: string (number in portuguese)
         """
 
+        result = ""
+
         number_as_str = str(number)
+
+        # Check if the first char is a "-" sign
+        first_char = number_as_str[0]
+        if "-" == first_char:
+            result = "menos"
+
+            # Removes the negative sign from number
+            number_as_str = number_as_str[1::]
 
         number_len = len(number_as_str)
 
-        # TODO: Verificar se primeira posicao indica numero negativo. Se sim, inicializar result como "menos" e cortar
-        # da string
-
         if number_len == 1:
-            # Number is 1-9
-            return self.UNITS[number_as_str]
+            # Number is -9 to -1
+            result = ' '.join([result, self.UNITS[number_as_str]])
+            return result.strip()
 
         if number_len == 2:
-            return self._get_two_digits_number_in_extension(number_as_str)
+            result = ' '.join([result, self._get_two_digits_number_in_extension(number_as_str)])
+            return result.strip()
 
-        if number_len > 6:
+
+
+        if number_len > 5:
             raise NotAcceptable(detail=self.MAX_LIMIT_ERROR)
-
-        if number_len == 6:
-            is_negative = self._is_negative(number_as_str)
-
-            if not is_negative:
-                raise NotAcceptable(detail=self.MAX_LIMIT_ERROR)
-
-            result = 'menos'
 
     def _get_two_digits_number_in_extension(self, numeric_string):
         first_position = numeric_string[0]
@@ -89,8 +93,3 @@ class NumberTranslationService:
             return result
         # Number has two digits, ending in a number 1-9
         return ' e '.join([result, self.UNITS[second_position]])
-
-    def _is_negative(self, number_as_str):
-        first_position = number_as_str[0]
-
-        return first_position == '-'
