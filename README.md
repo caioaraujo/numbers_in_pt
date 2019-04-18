@@ -37,3 +37,19 @@ or<br>
 `python manage.py runserver`<br>
 or<br>
 `make start`
+
+### Docker
+
+`docker run -p 8000:80 numbers_in_pt`<br>
+or<br>
+`make docker-run`
+
+After server starts, access http://localhost:8000/ 
+
+## Tests
+
+Run all project tests with:
+
+`python manage.py test`<br>
+or<br>
+`make test`

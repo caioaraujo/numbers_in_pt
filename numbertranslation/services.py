@@ -3,8 +3,9 @@ from rest_framework.exceptions import NotAcceptable
 
 class NumberTranslationService:
 
-    MAX_LIMIT_ERROR = 'Número acima do limite válido'
+    MAX_LIMIT_ERROR = 'Número fora do limite válido'
     ZERO = 'zero'
+    CEM = 'cem'
 
     UNITS = {
         '1': 'um',
@@ -85,6 +86,7 @@ class NumberTranslationService:
         number_len = len(number_as_str)
 
         if number_len > 1 and self._is_zero_sequence(number_as_str):
+            # the rest of the number ends in zeros
             return result.strip()
 
         if first_position == '0':
@@ -100,6 +102,10 @@ class NumberTranslationService:
             first_two_positions = number_as_str[0] + number_as_str[1]
             result = ' '.join([result, self._get_two_digits_number_in_extension(first_two_positions), 'mil'])
 
+            if self._is_zero_sequence(number_as_str[2::]):
+                return result.strip()
+            result = ' '.join([result, 'e'])
+
             return self.get_number_in_portuguese(number=number_as_str[2::], result=result)
 
         if number_len == 4:
@@ -107,21 +113,16 @@ class NumberTranslationService:
 
             if self._is_zero_sequence(number_as_str[1::]):
                 return result.strip()
-            second_position = number_as_str[1]
-            third_position = number_as_str[2]
-            fourth_position = number_as_str[3]
-            if second_position == '0' or (third_position == '0' and fourth_position == '0'):
-                result = ' '.join([result, 'e'])
+            result = ' '.join([result, 'e'])
 
             return self.get_number_in_portuguese(number=number_as_str[1::], result=result)
 
         if number_len == 3:
-            # Number is in [-999, -100], [100, 999]
             is_following_zeros = self._is_zero_sequence(number_as_str[1::])
 
             if first_position == '1':
                 if is_following_zeros:
-                    result = ' '.join([result, 'cem'])
+                    result = ' '.join([result, self.CEM])
                     return result.strip()
                 result = ' '.join([result, 'cento e'])
                 return self.get_number_in_portuguese(number=number_as_str[1::], result=result)
@@ -132,13 +133,10 @@ class NumberTranslationService:
             return self.get_number_in_portuguese(number=number_as_str[1::], result=result)
 
         if number_len == 2:
-            # Number is in [-99, -10], [10, 99]
             result = ' '.join([result, self._get_two_digits_number_in_extension(number_as_str)])
             return result.strip()
 
         if number_len == 1:
-
-            # Number is in [-9, 9]
             result = ' '.join([result, self.UNITS[number_as_str]])
 
         return result.strip()

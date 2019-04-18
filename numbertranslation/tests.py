@@ -55,7 +55,7 @@ class TestNumberTranslationAPI(APITestCase):
 
         response = self.client.get(path='/9999')
         self.assertEqual(status.HTTP_200_OK, response.status_code)
-        self.assertEqual({'extenso': 'nove mil novecentos e noventa e nove'}, response.data)
+        self.assertEqual({'extenso': 'nove mil e novecentos e noventa e nove'}, response.data)
 
         response = self.client.get(path='/10000')
         self.assertEqual(status.HTTP_200_OK, response.status_code)
@@ -64,6 +64,10 @@ class TestNumberTranslationAPI(APITestCase):
         response = self.client.get(path='/20001')
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual({'extenso': 'vinte mil e um'}, response.data)
+
+        response = self.client.get(path='/5781')
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual({'extenso': 'cinco mil e setecentos e oitenta e um'}, response.data)
 
     def test_negative_numbers(self):
         response = self.client.get(path='/-8')
@@ -98,10 +102,18 @@ class TestNumberTranslationAPI(APITestCase):
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual({'extenso': 'menos duzentos e trinta e dois'}, response.data)
 
+        response = self.client.get(path='/-3050')
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual({'extenso': 'menos três mil e cinquenta'}, response.data)
+
+        response = self.client.get(path='/-8880')
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual({'extenso': 'menos oito mil e oitocentos e oitenta'}, response.data)
+
     def test_invalid_range(self):
         response = self.client.get(path='/111111')
         self.assertEqual(status.HTTP_406_NOT_ACCEPTABLE, response.status_code)
-        self.assertEqual('Número acima do limite válido', response.data['detail'])
+        self.assertEqual('Número fora do limite válido', response.data['detail'])
 
     def test_invalid_path(self):
         response = self.client.get(path='/dois')
