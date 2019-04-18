@@ -79,30 +79,35 @@ class NumberTranslationService:
         # Check if the first char is a "-" sign
         first_position = number_as_str[0]
         if "-" == first_position:
-            # Removes the negative sign from number
             result = "menos"
+            # Removes the negative sign from number
             return self.get_number_in_portuguese(number=number_as_str[1::], result=result)
 
         number_len = len(number_as_str)
 
         if number_len > 1 and self._is_zero_sequence(number_as_str):
-            # the rest of the number ends in zeros
+            # the rest of the number ends in a zero sequence
             return result.strip()
 
         if first_position == '0':
             if number_len > 1:
+                # Cut off the leading zero
                 return self.get_number_in_portuguese(number=number_as_str[1::], result=result)
             if not result or result == '-':
+                # The number is zero
                 return self.ZERO
 
         if number_len > 5:
+            # Out of range
             raise NotAcceptable(detail=self.MAX_LIMIT_ERROR)
 
         if number_len == 5:
+            # Extract the dozen-thounsands
             first_two_positions = number_as_str[0] + number_as_str[1]
             result = ' '.join([result, self._get_two_digits_number_in_extension(first_two_positions), 'mil'])
 
             if self._is_zero_sequence(number_as_str[2::]):
+                # Number ends in a zero sequence
                 return result.strip()
             result = ' '.join([result, 'e'])
 
@@ -112,6 +117,7 @@ class NumberTranslationService:
             result = ' '.join([result, self.THOUSANDS[first_position]])
 
             if self._is_zero_sequence(number_as_str[1::]):
+                # Number ends in a zero sequence
                 return result.strip()
             result = ' '.join([result, 'e'])
 
@@ -121,13 +127,16 @@ class NumberTranslationService:
             is_following_zeros = self._is_zero_sequence(number_as_str[1::])
 
             if first_position == '1':
+                # Number ends in 1xx
                 if is_following_zeros:
+                    # Number is 100
                     result = ' '.join([result, self.CEM])
                     return result.strip()
                 result = ' '.join([result, 'cento e'])
                 return self.get_number_in_portuguese(number=number_as_str[1::], result=result)
             result = ' '.join([result, self.HUNDREDS[first_position]])
             if is_following_zeros:
+                # Number ends in a zero sequence
                 return result.strip()
             result = ' '.join([result, 'e'])
             return self.get_number_in_portuguese(number=number_as_str[1::], result=result)
